@@ -32,7 +32,7 @@ class _HomePageState extends State<HomePage> {
                 onTap: () => _onClicked(index),
                 child: new Container(
                   decoration: new BoxDecoration(
-                      color: Colors.green,
+                      color: Colors.black,
                       borderRadius: new BorderRadius.circular(8)),
                   child: new Center(
                     child: new Text(
@@ -40,7 +40,9 @@ class _HomePageState extends State<HomePage> {
                       style: new TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 60,
-                          color: Colors.white),
+                          color: _elementList[index] == "0"
+                              ? Colors.white
+                              : Colors.yellow),
                     ),
                   ),
                 ),
