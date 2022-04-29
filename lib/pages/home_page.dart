@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  bool computerMode = false;
+  HomePage({Key? key, required this.computerMode}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -14,11 +16,14 @@ class _HomePageState extends State<HomePage> {
   int winnerID = 0;
   bool isGameTied = false;
   late ConfettiController confettiController;
+  var player1Name = "Player 1";
+  var player2Name = "Player 2";
 
   @override
   void initState() {
     confettiController =
         new ConfettiController(duration: new Duration(seconds: 3));
+    getSharedPreferenceDate();
     super.initState();
   }
 
@@ -58,7 +63,11 @@ class _HomePageState extends State<HomePage> {
                 decoration: new BoxDecoration(
                     color: Colors.transparent,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.black38)),
+                    border: Border.all(
+                        color: MediaQuery.of(context).platformBrightness !=
+                                Brightness.dark
+                            ? Colors.black38
+                            : Colors.white38)),
                 child: new IntrinsicHeight(
                   child: new Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -66,7 +75,10 @@ class _HomePageState extends State<HomePage> {
                         profile1(),
                         new VerticalDivider(
                           thickness: 1,
-                          color: Colors.black38,
+                          color: MediaQuery.of(context).platformBrightness !=
+                                  Brightness.dark
+                              ? Colors.black38
+                              : Colors.white38,
                         ),
                         profile2()
                       ]),
@@ -109,8 +121,8 @@ class _HomePageState extends State<HomePage> {
                 child: new Text(
                   winnerID != 0
                       ? winnerID == 1
-                          ? "Player 1 won"
-                          : "Player 2 won"
+                          ? "$player1Name won"
+                          : "$player2Name won"
                       : "",
                   style:
                       new TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -257,7 +269,7 @@ class _HomePageState extends State<HomePage> {
           new Padding(
             padding: new EdgeInsets.only(left: 8),
             child: new Text(
-              "Player 1",
+              player1Name,
               style: new TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -287,7 +299,7 @@ class _HomePageState extends State<HomePage> {
           new Padding(
             padding: new EdgeInsets.only(left: 8),
             child: new Text(
-              "Player 2",
+              player2Name,
               style: new TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -297,5 +309,13 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+
+  void getSharedPreferenceDate() async {
+    var pref = await SharedPreferences.getInstance();
+    setState(() {
+      player1Name = pref.getString("player1Name") ?? "Player 1";
+      player2Name = pref.getString("player2Name") ?? "Player 2";
+    });
   }
 }

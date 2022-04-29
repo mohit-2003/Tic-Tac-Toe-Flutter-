@@ -13,6 +13,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return new MaterialApp(
       title: 'Tic Tac Toe',
+      theme: new ThemeData(),
+      darkTheme: new ThemeData.dark(),
+      themeMode: ThemeMode.system,
       home: new SelectCategory(),
     );
   }
