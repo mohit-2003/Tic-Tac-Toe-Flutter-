@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,7 +14,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _buttonList = new List.filled(9, "", growable: false);
-  bool oTurn = true;
+  final _emptyCellsList = new List.filled(9, true, growable: false);
+  bool oTurn = false;
   int winnerID = 0;
   bool isGameTied = false;
   late ConfettiController confettiController;
@@ -22,7 +25,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    if (widget.computerMode) player1Name = "Computer";
+    if (widget.computerMode) player2Name = "Computer";
     confettiController =
         new ConfettiController(duration: new Duration(seconds: 1));
     getSharedPreferenceDate();
@@ -134,19 +137,17 @@ class _HomePageState extends State<HomePage> {
 
   void _onClicked(int index) {
     setState(() {
-      if (oTurn && _buttonList[index] == "") {
-        _buttonList[index] = "O";
-        oTurn = !oTurn;
-      } else if (!oTurn && _buttonList[index] == "") {
-        _buttonList[index] = "X";
-        oTurn = !oTurn;
-      }
+      if (widget.computerMode)
+        vsComputer(index);
+      else
+        vsFriend(index);
       // checking if anyone wins
       winnerID = checkWinner();
       if (winnerID != 0 && winnerID != -1) confettiController.play();
       // checking if all buttons are filled
       isGameTied = checkGameTied();
       if (isGameTied) winnerID = -1;
+      // set text
       switch (winnerID) {
         case -1:
           winOrLose = "Game tied";
@@ -163,8 +164,155 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void vsComputer(int index) {
+    // bot play logic
+    setState(() {
+      _emptyCellsList[index] = false;
+      if (_buttonList[index] == "") {
+        _buttonList[index] = "O";
+      }
+    });
+    botTurn();
+  }
+
+  void vsFriend(int index) {
+    setState(() {
+      if (oTurn && _buttonList[index] == "") {
+        _buttonList[index] = "O";
+        oTurn = !oTurn;
+      } else if (!oTurn && _buttonList[index] == "") {
+        _buttonList[index] = "X";
+        oTurn = !oTurn;
+      }
+    });
+  }
+
+  void botTurn() {
+    bool isDefendable = false;
+    for (int i = 0; i < _emptyCellsList.length; i++) {
+      // empty cell
+      if (_emptyCellsList[i]) {
+        isDefendable = checkRow4Bot(i);
+        if (isDefendable) {
+          setState(() {
+            _buttonList[i] = "X";
+            _emptyCellsList[i] = false;
+          });
+          return;
+        }
+        isDefendable = checkColumn4Bot(i);
+        if (isDefendable) {
+          setState(() {
+            _buttonList[i] = "X";
+            _emptyCellsList[i] = false;
+          });
+          return;
+        }
+        isDefendable = checkDiagonal4Bot(i);
+        if (isDefendable) {
+          setState(() {
+            _buttonList[i] = "X";
+            _emptyCellsList[i] = false;
+          });
+          return;
+        }
+      }
+    }
+    for (int i = 0; i < _emptyCellsList.length; i++) {
+      // empty cell
+      if (_emptyCellsList[i]) {
+        setState(() {
+          _buttonList[i] = "X";
+          _emptyCellsList[i] = false;
+        });
+        return;
+      }
+    }
+  }
+
+  bool checkRow4Bot(int index) {
+    if (index >= 0 && index <= 2) {
+      int r = 0;
+      for (int i = 0; i <= 2; i++) {
+        if (index == i) continue;
+        if (_buttonList[i] == "O") r++;
+      }
+      if (r == 2) return true;
+    } else if (index >= 3 && index <= 5) {
+      int r = 0;
+      for (int i = 3; i <= 5; i++) {
+        if (index == i) continue;
+        if (_buttonList[i] == "O") r++;
+      }
+      if (r == 2) return true;
+    } else if (index >= 6 && index <= 8) {
+      int r = 0;
+      for (int i = 6; i <= 8; i++) {
+        if (index == i) continue;
+        if (_buttonList[i] == "O") r++;
+      }
+      if (r == 2) return true;
+    }
+    return false;
+  }
+
+  bool checkColumn4Bot(int index) {
+    if (index == 0 || index == 3 || index == 6) {
+      int r = 0;
+      for (int i = 0; i <= 6; i += 3) {
+        if (index == i) continue;
+        if (_buttonList[i] == "O") r++;
+      }
+      if (r == 2) return true;
+    } else if (index == 1 || index == 4 || index == 7) {
+      int r = 0;
+      for (int i = 1; i <= 7; i += 3) {
+        if (index == i) continue;
+        if (_buttonList[i] == "O") r++;
+      }
+      if (r == 2) return true;
+    } else if (index == 2 || index == 5 || index == 8) {
+      int r = 0;
+      for (int i = 2; i <= 8; i += 3) {
+        if (index == i) continue;
+        if (_buttonList[i] == "O") r++;
+      }
+      if (r == 2) return true;
+    }
+    return false;
+  }
+
+  bool checkDiagonal4Bot(int index) {
+    if (index == 4) {
+      bool res = false;
+      if (_buttonList[0] == "O" && _buttonList[8] == "O") res = true;
+      if (_buttonList[2] == "O" && _buttonList[6] == "O") res = true;
+      return res;
+    }
+    if (index == 0 || index == 8) {
+      int r = 0;
+      for (int i = 0; i <= 8; i += 4) {
+        if (index == i) continue;
+        if (_buttonList[i] == "O") r++;
+      }
+      if (r == 2) return true;
+    } else if (index == 2 || index == 6) {
+      int r = 0;
+      for (int i = 2; i <= 6; i += 2) {
+        if (index == i) continue;
+        if (_buttonList[i] == "O") r++;
+      }
+      if (r == 2) return true;
+    }
+    return false;
+  }
+
   void restartGame() {
     setState(() {
+      for (int i = 0; i < 9; i++) {
+        _emptyCellsList[i] = true;
+      }
+
       isGameTied = false;
       winnerID = 0;
       oTurn = true;
@@ -273,9 +421,7 @@ class _HomePageState extends State<HomePage> {
             backgroundColor: oTurn ? Colors.green : Colors.transparent,
             child: new CircleAvatar(
               radius: 16,
-              backgroundImage: !widget.computerMode
-                  ? new AssetImage("assets/images/user1.png")
-                  : new AssetImage("assets/images/computer.png"),
+              backgroundImage: new AssetImage("assets/images/user1.png"),
               backgroundColor: Colors.orange,
             ),
           ),
@@ -305,7 +451,9 @@ class _HomePageState extends State<HomePage> {
             backgroundColor: !oTurn ? Colors.green : Colors.transparent,
             child: new CircleAvatar(
               radius: 16,
-              backgroundImage: new AssetImage("assets/images/user2.png"),
+              backgroundImage: !widget.computerMode
+                  ? new AssetImage("assets/images/user2.png")
+                  : new AssetImage("assets/images/computer.png"),
               backgroundColor: Colors.orange,
             ),
           ),

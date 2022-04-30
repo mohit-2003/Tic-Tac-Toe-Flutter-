@@ -51,7 +51,7 @@ class _SelectCategoryState extends State<SelectCategory> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   new TextField(
-                                    controller: textFieldController2,
+                                    controller: textFieldController1,
                                     decoration: new InputDecoration(
                                         border: new OutlineInputBorder(),
                                         labelText: "Enter Your Name",
@@ -66,10 +66,10 @@ class _SelectCategoryState extends State<SelectCategory> {
                                   ),
                                   new OutlinedButton(
                                       onPressed: () {
-                                        saveDetails("player1Name", "Computer");
-                                        saveDetails("player2Name",
-                                            textFieldController2.text);
-                                        navigate(false, context);
+                                        saveDetails("player1Name",
+                                            textFieldController1.text);
+                                        saveDetails("player2Name", "Computer");
+                                        navigate(true, context);
                                       },
                                       child: new Text("Submit"))
                                 ],
