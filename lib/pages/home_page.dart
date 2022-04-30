@@ -18,11 +18,13 @@ class _HomePageState extends State<HomePage> {
   late ConfettiController confettiController;
   var player1Name = "Player 1";
   var player2Name = "Player 2";
+  String winOrLose = "";
 
   @override
   void initState() {
+    if (widget.computerMode) player1Name = "Computer";
     confettiController =
-        new ConfettiController(duration: new Duration(seconds: 3));
+        new ConfettiController(duration: new Duration(seconds: 1));
     getSharedPreferenceDate();
     super.initState();
   }
@@ -119,11 +121,7 @@ class _HomePageState extends State<HomePage> {
               new Padding(
                 padding: new EdgeInsets.all(16),
                 child: new Text(
-                  winnerID != 0
-                      ? winnerID == 1
-                          ? "$player1Name won"
-                          : "$player2Name won"
-                      : "",
+                  winOrLose,
                   style:
                       new TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
@@ -145,10 +143,23 @@ class _HomePageState extends State<HomePage> {
       }
       // checking if anyone wins
       winnerID = checkWinner();
-      if (winnerID != 0) confettiController.play();
+      if (winnerID != 0 && winnerID != -1) confettiController.play();
       // checking if all buttons are filled
       isGameTied = checkGameTied();
-      if (isGameTied) restartGame();
+      if (isGameTied) winnerID = -1;
+      switch (winnerID) {
+        case -1:
+          winOrLose = "Game tied";
+          break;
+        case 1:
+          winOrLose = "$player1Name won";
+          break;
+        case 2:
+          winOrLose = "$player2Name won";
+          break;
+        default:
+          winOrLose = "";
+      }
     });
   }
 
@@ -262,7 +273,9 @@ class _HomePageState extends State<HomePage> {
             backgroundColor: oTurn ? Colors.green : Colors.transparent,
             child: new CircleAvatar(
               radius: 16,
-              backgroundImage: new AssetImage("assets/images/user1.png"),
+              backgroundImage: !widget.computerMode
+                  ? new AssetImage("assets/images/user1.png")
+                  : new AssetImage("assets/images/computer.png"),
               backgroundColor: Colors.orange,
             ),
           ),

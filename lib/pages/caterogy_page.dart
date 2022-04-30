@@ -37,7 +37,46 @@ class _SelectCategoryState extends State<SelectCategory> {
                 ),
                 title: new Text("Computer"),
                 subtitle: new Text("Offline"),
-                onTap: () {},
+                onTap: () {
+                  showModalBottomSheet(
+                      isScrollControlled: true,
+                      context: context,
+                      builder: (context) => new Container(
+                            margin: new EdgeInsets.all(16),
+                            child: new Padding(
+                              padding: new EdgeInsets.only(
+                                  bottom:
+                                      MediaQuery.of(context).viewInsets.bottom),
+                              child: new Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  new TextField(
+                                    controller: textFieldController2,
+                                    decoration: new InputDecoration(
+                                        border: new OutlineInputBorder(),
+                                        labelText: "Enter Your Name",
+                                        icon: new CircleAvatar(
+                                          child: new Image.asset(
+                                              "assets/images/user2.png"),
+                                        )),
+                                  ),
+                                  new SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                  ),
+                                  new OutlinedButton(
+                                      onPressed: () {
+                                        saveDetails("player1Name", "Computer");
+                                        saveDetails("player2Name",
+                                            textFieldController2.text);
+                                        navigate(false, context);
+                                      },
+                                      child: new Text("Submit"))
+                                ],
+                              ),
+                            ),
+                          ));
+                },
                 shape: new RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                     side: new BorderSide(color: Colors.blueGrey)),
@@ -94,11 +133,10 @@ class _SelectCategoryState extends State<SelectCategory> {
                                   ),
                                   new OutlinedButton(
                                       onPressed: () {
-                                        List<String> list = [
-                                          textFieldController1.text,
-                                          textFieldController2.text
-                                        ];
-                                        saveDetails(list);
+                                        saveDetails("player1Name",
+                                            textFieldController1.text);
+                                        saveDetails("player2Name",
+                                            textFieldController2.text);
                                         navigate(false, context);
                                       },
                                       child: new Text("Submit"))
@@ -141,11 +179,9 @@ class _SelectCategoryState extends State<SelectCategory> {
             builder: (context) => new HomePage(computerMode: computerMode)));
   }
 
-  void saveDetails(List<String> list) async {
+  void saveDetails(String key, String value) async {
     var pref = await SharedPreferences.getInstance();
-    for (int i = 0; i < list.length; i++) {
-      pref.setString("player${i + 1}Name", list[i]);
-    }
+    pref.setString(key, value);
   }
 
   void getSharedPreferenceDate() async {
